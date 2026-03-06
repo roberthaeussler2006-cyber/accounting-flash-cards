@@ -134,6 +134,13 @@
       letter-spacing: 0.1em;
     }
 
+    .card-back .note {
+      font-size: 0.85rem;
+      color: #999;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+
     .nav {
       display: flex;
       gap: 1rem;
@@ -202,6 +209,7 @@
       <div class="card-face card-back">
         <div class="formula-label" id="backLabel"></div>
         <div class="formula" id="backFormula"></div>
+        <div class="note" id="backNote"></div>
       </div>
     </div>
   </div>
@@ -267,6 +275,36 @@
         front: "Return on Assets",
         label: "Return on Assets (ROA)",
         formula: "$$\\text{ROA} = \\frac{\\text{Profit of the Year} + \\text{Financial Expenses}}{\\text{Average Total Assets}} \\times 100$$"
+      },
+      {
+        front: "Gross Profit",
+        label: "Profit Waterfall",
+        formula: "$$\\text{Gross Profit} = \\text{Revenue (Sales)} - \\text{COGS}$$",
+        note: "How profitable is the core product?"
+      },
+      {
+        front: "EBITDA",
+        label: "Profit Waterfall",
+        formula: "$$\\text{EBITDA} = \\text{Gross Profit} - \\text{Operating Expenses}$$",
+        note: "How profitable are operations, ignoring financing and accounting choices?"
+      },
+      {
+        front: "EBIT (Operating Profit)",
+        label: "Profit Waterfall",
+        formula: "$$\\text{EBIT} = \\text{EBITDA} - \\text{Depreciation \\& Amortisation}$$",
+        note: "How profitable after asset wear and tear?"
+      },
+      {
+        front: "EBT",
+        label: "Profit Waterfall",
+        formula: "$$\\text{EBT} = \\text{EBIT} - \\text{Interest Expense} \\;(+ \\text{Interest Income})$$",
+        note: "How profitable after paying lenders?"
+      },
+      {
+        front: "Net Profit",
+        label: "Profit Waterfall",
+        formula: "$$\\text{Net Profit} = \\text{EBT} - \\text{Tax}$$",
+        note: "How much actually belongs to owners? (Bottom line)"
       }
     ];
 
@@ -277,6 +315,7 @@
       document.getElementById('frontText').textContent = c.front;
       document.getElementById('backLabel').textContent = c.label;
       document.getElementById('backFormula').innerHTML = c.formula;
+      document.getElementById('backNote').textContent = c.note || '';
       document.getElementById('counter').textContent = `${current + 1} / ${cards.length}`;
       document.getElementById('prevBtn').disabled = current === 0;
       document.getElementById('nextBtn').disabled = current === cards.length - 1;
