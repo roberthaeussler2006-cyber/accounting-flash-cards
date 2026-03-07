@@ -305,6 +305,35 @@
         label: "Profit Waterfall",
         formula: "$$\\text{Net Profit} = \\text{EBT} - \\text{Tax}$$",
         note: "How much actually belongs to owners? (Bottom line)"
+      },
+      {
+        front: "Accrued Interest",
+        label: "Accrued Interest",
+        formula: "$$\\text{Interest} = \\text{Nominal} \\times \\text{Rate\\%} \\times \\frac{\\text{Days}}{360}$$",
+        note: "Always use 360 days"
+      },
+      {
+        front: "Anticipatory Tax (Swiss)",
+        label: "Anticipatory Tax (Verrechnungssteuer)",
+        formula: "$$65\\% \\rightarrow \\text{Bank} \\qquad 35\\% \\rightarrow \\text{Receivables, anticipatory tax}$$",
+        note: "Applied to: bond interest, bank interest, dividends"
+      },
+      {
+        front: "Dividends",
+        label: "Dividends",
+        formula: "$$\\text{Gross Dividend} = \\text{Nominal Value} \\times \\text{Dividend \\%}$$",
+        note: "Never use market value"
+      },
+      {
+        front: "Balance Sheet Change Types",
+        label: "Balance Sheet Change Types",
+        formula: "$$\\begin{aligned} &\\textbf{Asset swap:} && \\text{one asset} \\uparrow \\;\\text{one asset} \\downarrow \\\\ &\\textbf{Liability swap:} && \\text{one liability} \\uparrow \\;\\text{one liability} \\downarrow \\\\ &\\textbf{Capital procurement:} && \\text{asset} \\uparrow \\;\\text{AND liability} \\uparrow \\\\ &\\textbf{Capital repayment:} && \\text{asset} \\downarrow \\;\\text{AND liability} \\downarrow \\end{aligned}$$"
+      },
+      {
+        front: "Golden Rule of Finance",
+        label: "Golden Rule of Finance",
+        formula: "$$\\text{Non-current Assets} \\leq \\text{Equity} + \\text{Long-term Debt}$$",
+        note: "Long-term assets must be financed with long-term capital"
       }
     ];
 
