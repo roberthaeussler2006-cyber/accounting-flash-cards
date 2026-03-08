@@ -448,8 +448,8 @@
       {
         front: "Anticipatory Tax (Swiss)",
         label: "Anticipatory Tax (Verrechnungssteuer)",
-        formula: "$$65\\% \\rightarrow \\text{Bank} \\qquad 35\\% \\rightarrow \\text{Receivables, anticipatory tax}$$",
-        note: "Applied to: bond interest, bank interest, dividends"
+        formula: "$$\\underbrace{65\\% \\rightarrow \\text{Bank}}_{\\text{cash}} \\qquad \\underbrace{35\\% \\rightarrow \\text{Receivables, anticipatory tax}}_{\\text{claim}} \\qquad \\text{both credited to Financial Income}$$",
+        note: "Whenever you see a Swiss dividend, always split 65/35. Applied to: bond interest, bank interest, dividends."
       },
       {
         front: "Dividends",
