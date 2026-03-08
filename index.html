@@ -192,11 +192,93 @@
       font-family: inherit;
       font-size: 0.75rem;
     }
+
+    .toolbar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .toolbar button {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      color: #aaa;
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toolbar button:hover {
+      background: #2a2a4a;
+      color: #fff;
+      border-color: #667eea;
+    }
+
+    .toolbar button.active {
+      background: #667eea22;
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .got-it-btn {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: #1a2e1a;
+      border: 1px solid #2a4a2a;
+      color: #6c6;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .got-it-btn:hover {
+      background: #2a4a2a;
+      transform: scale(1.1);
+    }
+
+    .got-it-btn.mastered {
+      background: #2a4a2a;
+      border-color: #4a8a4a;
+      color: #8f8;
+    }
+
+    .progress-dot.mastered {
+      background: #3a6a3a;
+    }
+
+    .progress-dot.mastered.active {
+      background: #5a5;
+      box-shadow: 0 0 8px rgba(85, 170, 85, 0.5);
+    }
+
+    .card-container.mastered-card {
+      opacity: 0.5;
+    }
+
+    .mastered-count {
+      color: #6c6;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
   <h1>Accounting Flash Cards</h1>
   <p class="subtitle">Click card to flip &middot; Arrow keys to navigate</p>
+
+  <div class="toolbar">
+    <button id="toggleHidden" onclick="toggleShowAll()">Show mastered</button>
+    <span class="mastered-count" id="masteredCount"></span>
+  </div>
 
   <div class="progress" id="progress"></div>
 
@@ -204,12 +286,14 @@
     <div class="card" id="card">
       <div class="card-face card-front">
         <h2 id="frontText"></h2>
+        <button class="got-it-btn" id="gotItFront" onclick="event.stopPropagation(); toggleMastered();" title="Mark as mastered">&#10003;</button>
         <span class="tap-hint">tap to reveal</span>
       </div>
       <div class="card-face card-back">
         <div class="formula-label" id="backLabel"></div>
         <div class="formula" id="backFormula"></div>
         <div class="note" id="backNote"></div>
+        <button class="got-it-btn" id="gotItBack" onclick="event.stopPropagation(); toggleMastered();" title="Mark as mastered">&#10003;</button>
       </div>
     </div>
   </div>
@@ -225,6 +309,55 @@
   </p>
 
   <script>
+    // Mastered cards persistence
+    const mastered = new Set(JSON.parse(localStorage.getItem('masteredCards') || '[]'));
+    let showAll = false;
+
+    function saveMastered() {
+      localStorage.setItem('masteredCards', JSON.stringify([...mastered]));
+    }
+
+    function getVisibleIndices() {
+      if (showAll) return cards.map((_, i) => i);
+      return cards.map((_, i) => i).filter(i => !mastered.has(i));
+    }
+
+    function toggleMastered() {
+      const visible = getVisibleIndices();
+      const cardIndex = visible[current];
+      if (mastered.has(cardIndex)) {
+        mastered.delete(cardIndex);
+      } else {
+        mastered.add(cardIndex);
+        // Auto-advance to next unmastered card if hiding
+        if (!showAll) {
+          const newVisible = getVisibleIndices();
+          if (newVisible.length === 0) {
+            showAll = true;
+            document.getElementById('toggleHidden').classList.add('active');
+            document.getElementById('toggleHidden').textContent = 'Hide mastered';
+            current = 0;
+          } else if (current >= newVisible.length) {
+            current = newVisible.length - 1;
+          }
+        }
+      }
+      saveMastered();
+      buildDots();
+      render();
+    }
+
+    function toggleShowAll() {
+      showAll = !showAll;
+      const btn = document.getElementById('toggleHidden');
+      btn.textContent = showAll ? 'Hide mastered' : 'Show mastered';
+      btn.classList.toggle('active', showAll);
+      const visible = getVisibleIndices();
+      if (current >= visible.length) current = Math.max(0, visible.length - 1);
+      buildDots();
+      render();
+    }
+
     const cards = [
       {
         front: "Gross Profit Margin",
@@ -376,18 +509,38 @@
     let current = 0;
 
     function render() {
-      const c = cards[current];
+      const visible = getVisibleIndices();
+      if (visible.length === 0) {
+        document.getElementById('frontText').textContent = 'All cards mastered!';
+        document.getElementById('counter').textContent = '0 / 0';
+        document.getElementById('prevBtn').disabled = true;
+        document.getElementById('nextBtn').disabled = true;
+        document.getElementById('cardContainer').classList.remove('mastered-card');
+        document.getElementById('gotItFront').classList.remove('mastered');
+        document.getElementById('gotItBack').classList.remove('mastered');
+        document.getElementById('masteredCount').textContent = `${mastered.size} / ${cards.length} mastered`;
+        return;
+      }
+      const cardIndex = visible[current];
+      const c = cards[cardIndex];
+      const isMastered = mastered.has(cardIndex);
+
       document.getElementById('frontText').textContent = c.front;
       document.getElementById('backLabel').textContent = c.label;
       document.getElementById('backFormula').innerHTML = c.formula;
       document.getElementById('backNote').textContent = c.note || '';
-      document.getElementById('counter').textContent = `${current + 1} / ${cards.length}`;
+      document.getElementById('counter').textContent = `${current + 1} / ${visible.length}`;
       document.getElementById('prevBtn').disabled = current === 0;
-      document.getElementById('nextBtn').disabled = current === cards.length - 1;
+      document.getElementById('nextBtn').disabled = current === visible.length - 1;
       document.getElementById('card').classList.remove('flipped');
+      document.getElementById('cardContainer').classList.toggle('mastered-card', isMastered);
+      document.getElementById('gotItFront').classList.toggle('mastered', isMastered);
+      document.getElementById('gotItBack').classList.toggle('mastered', isMastered);
+      document.getElementById('masteredCount').textContent = `${mastered.size} / ${cards.length} mastered`;
 
       // Update progress dots
-      document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+      const dots = document.querySelectorAll('.progress-dot');
+      dots.forEach((dot, i) => {
         dot.classList.toggle('active', i === current);
       });
 
@@ -402,21 +555,27 @@
     }
 
     function navigate(dir) {
+      const visible = getVisibleIndices();
       const next = current + dir;
-      if (next >= 0 && next < cards.length) {
+      if (next >= 0 && next < visible.length) {
         current = next;
         render();
       }
     }
 
     // Build progress dots
-    const progressEl = document.getElementById('progress');
-    cards.forEach((_, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'progress-dot';
-      dot.onclick = (e) => { e.stopPropagation(); current = i; render(); };
-      progressEl.appendChild(dot);
-    });
+    function buildDots() {
+      const progressEl = document.getElementById('progress');
+      progressEl.innerHTML = '';
+      const visible = getVisibleIndices();
+      visible.forEach((cardIndex, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        if (mastered.has(cardIndex)) dot.classList.add('mastered');
+        dot.onclick = (e) => { e.stopPropagation(); current = i; render(); };
+        progressEl.appendChild(dot);
+      });
+    }
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
@@ -425,6 +584,7 @@
       else if (e.key === ' ') { e.preventDefault(); flipCard(); }
     });
 
+    buildDots();
     render();
   </script>
 </body>
